@@ -3,11 +3,10 @@ package com.example.android.inventoryapp;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -55,7 +54,6 @@ public class CatalogActivity extends AppCompatActivity {
      */
     private void displayDatabaseInfo() {
         // Create and/or open a database to read from it
-        SQLiteDatabase db = mDbHelper.getReadableDatabase();
 
         // Define a projection that specifies which columns from the database
         // you will actually use after this query.
@@ -65,15 +63,13 @@ public class CatalogActivity extends AppCompatActivity {
                 InventoryContract.InventoryEntry.COLUMN_QUANTITY,
                 InventoryContract.InventoryEntry.COLUMN_PRICE,};
 
-        // Perform a query on the inventory table
-        Cursor cursor = db.query(
-                InventoryContract.InventoryEntry.TABLE_NAME,   // The table to query
-                projection,            // The columns to return
-                null,                  // The columns for the WHERE clause
-                null,                  // The values for the WHERE clause
-                null,                  // Don't group the rows
-                null,                  // Don't filter by row groups
-                null);                   // The sort order
+        Cursor cursor = getContentResolver().query(
+                InventoryContract.InventoryEntry.CONTENT_URI,   // The content URI of the words table
+                projection,             // The columns to return for each row
+                null,                   // Selection criteria
+                null,                   // Selection criteria
+                null);                  // The sort order for the returned rows
+
 
         TextView displayView = (TextView) findViewById(R.id.text_view_item);
 
@@ -91,6 +87,7 @@ public class CatalogActivity extends AppCompatActivity {
                     InventoryContract.InventoryEntry.COLUMN_QUANTITY + " - " +
                     InventoryContract.InventoryEntry.COLUMN_PRICE + "\n");
 
+
             // Figure out the index of each column
             int idColumnIndex = cursor.getColumnIndex(InventoryContract.InventoryEntry._ID);
             int nameColumnIndex = cursor.getColumnIndex(InventoryContract.InventoryEntry.COLUMN_NAME);
@@ -105,7 +102,7 @@ public class CatalogActivity extends AppCompatActivity {
                 int currentID = cursor.getInt(idColumnIndex);
                 String currentName = cursor.getString(nameColumnIndex);
                 String currentQuantity = cursor.getString(quantityColumnIndex);
-                int currentPrice = cursor.getInt(priceColumnIndex);
+                double currentPrice = cursor.getInt(priceColumnIndex);
 
                 // Display the values from each column of the current row in the cursor in the TextView
                 displayView.append(("\n" + currentID + " - " +
@@ -124,26 +121,40 @@ public class CatalogActivity extends AppCompatActivity {
      * Helper method to insert hardcoded item data into the database. For debugging purposes only.
      */
     private void insertItem() {
-        // Gets the database in write mode
-        SQLiteDatabase db = mDbHelper.getWritableDatabase();
 
-        // Create a ContentValues object where column names are the keys,
-        // and the item's attributes are the values.
+            // Create a ContentValues object where column names are the keys,
+            // and Toto's pet attributes are the values.
         ContentValues values = new ContentValues();
         values.put(InventoryContract.InventoryEntry.COLUMN_NAME, "Apple");
         values.put(InventoryContract.InventoryEntry.COLUMN_QUANTITY, 100);
         values.put(InventoryContract.InventoryEntry.COLUMN_PRICE, 7);
 
-        // Insert a new row for Apple in the database, returning the ID of that new row.
-        // The first argument for db.insert() is the Inventory table name.
-        // The second argument provides the name of a column in which the framework
-        // can insert NULL in the event that the ContentValues is empty (if
-        // this is set to "null", then the framework will not insert a row when
-        // there are no values).
-        // The third argument is the ContentValues object containing the info for Apples.
-        long newRowId = db.insert(InventoryContract.InventoryEntry.TABLE_NAME, null, values);
-        Log.v("CatalogActivity", "New Row ID " + newRowId);
-    }
+            // Insert a new row for Toto into the provider using the ContentResolver.
+            // Use the {@link PetEntry#CONTENT_URI} to indicate that we want to insert
+            // into the pets database table.
+            // Receive the new content URI that will allow us to access Toto's data in the future.
+            Uri newUri = getContentResolver().insert(InventoryContract.InventoryEntry.CONTENT_URI, values);
+        }
+//        // Gets the database in write mode
+//        SQLiteDatabase db = mDbHelper.getWritableDatabase();
+//
+//        // Create a ContentValues object where column names are the keys,
+//        // and the item's attributes are the values.
+//        ContentValues values = new ContentValues();
+//        values.put(InventoryContract.InventoryEntry.COLUMN_NAME, "Apple");
+//        values.put(InventoryContract.InventoryEntry.COLUMN_QUANTITY, 100);
+//        values.put(InventoryContract.InventoryEntry.COLUMN_PRICE, 7);
+//
+//        // Insert a new row for Apple in the database, returning the ID of that new row.
+//        // The first argument for db.insert() is the Inventory table name.
+//        // The second argument provides the name of a column in which the framework
+//        // can insert NULL in the event that the ContentValues is empty (if
+//        // this is set to "null", then the framework will not insert a row when
+//        // there are no values).
+//        // The third argument is the ContentValues object containing the info for Apples.
+//        long newRowId = db.insert(InventoryContract.InventoryEntry.TABLE_NAME, null, values);
+//        Log.v("CatalogActivity", "New Row ID " + newRowId);
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
