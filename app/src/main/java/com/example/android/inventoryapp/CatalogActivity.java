@@ -1,6 +1,7 @@
 package com.example.android.inventoryapp;
 
 import android.app.LoaderManager;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.CursorLoader;
 import android.content.Intent;
@@ -13,6 +14,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.example.android.inventoryapp.data.InventoryContract;
@@ -59,6 +61,21 @@ public class CatalogActivity extends AppCompatActivity implements
         // There is no pet data yet (until the loader finishes) so pass in null for the Cursor.
         mCursorAdapter = new InventoryCursorAdapter(this, null);
         petListView.setAdapter(mCursorAdapter);
+
+        petListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                //Create an intent to open EditorActivity
+                Intent intent = new Intent (CatalogActivity.this, EditorActivity.class);
+
+
+                //Form a Uri that contains the information held within the clicked list item view
+                Uri currentItemUri = ContentUris.withAppendedId(InventoryContract.InventoryEntry.CONTENT_URI, id);
+                intent.setData(currentItemUri);
+
+                startActivity(intent);
+            }
+        });
 
         // Kick off the loader
         getLoaderManager().initLoader(PET_LOADER, null, this);
