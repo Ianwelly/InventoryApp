@@ -2,6 +2,7 @@ package com.example.android.inventoryapp;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -64,14 +65,20 @@ public class InventoryCursorAdapter extends CursorAdapter {
         int quantityColumnIndex = cursor.getColumnIndex(InventoryContract.InventoryEntry.COLUMN_QUANTITY);
         int priceColumnIndex = cursor.getColumnIndex(InventoryContract.InventoryEntry.COLUMN_PRICE);
 
-        String  runString = cursor.getString(fruitColumnIndex);
-        String gymString = cursor.getString(quantityColumnIndex);
-        String walkString = cursor.getString(priceColumnIndex);
+        String  nameString = cursor.getString(fruitColumnIndex);
+        String quantityString = cursor.getString(quantityColumnIndex);
+        String priceString = cursor.getString(priceColumnIndex);
+
+        // If the pet breed is empty string or null, then use some default text
+        // that says "Unknown breed", so the TextView isn't blank.
+        if (TextUtils.isEmpty(quantityString)) {
+            quantityString = context.getString(R.string.unknown_breed);
+        }
 
 
-        fruitTextView.setText(runString);
-        quantityTextView.setText(gymString);
-        priceTextView.setText(walkString);
+        fruitTextView.setText(nameString);
+        quantityTextView.setText(quantityString);
+        priceTextView.setText(priceString);
 
         // TODO: Fill out this method
     }
