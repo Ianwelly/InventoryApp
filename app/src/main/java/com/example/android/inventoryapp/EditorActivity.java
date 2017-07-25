@@ -1,5 +1,6 @@
 package com.example.android.inventoryapp;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.app.LoaderManager;
 import android.content.ContentValues;
@@ -7,10 +8,15 @@ import android.content.CursorLoader;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NavUtils;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.Menu;
@@ -18,9 +24,13 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.example.android.inventoryapp.data.InventoryContract;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * Allows a user to add a new item
@@ -29,8 +39,11 @@ import com.example.android.inventoryapp.data.InventoryContract;
 public class EditorActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<Cursor> {
 
+    private static final int TAKE_PHOTO_CODE = 1;
+private static final int PHOTO_REQUEST_CODE = 2;
     /** Identifier for the pet data loader */
     private static final int EXISTING_PET_LOADER = 0;
+    public static final int CAMERA_REQUEST = 10;
 
     /** Content URI for the existing pet (null if it's a new pet) */
     private Uri mCurrentPetUri;
@@ -58,7 +71,8 @@ public class EditorActivity extends AppCompatActivity implements
             return false;
         }
     };
-    
+    private ImageView imageViewFruit;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -84,7 +98,11 @@ public class EditorActivity extends AppCompatActivity implements
             // Initialize a loader to read the pet data from the database
             // and display the current values in the editor
             getLoaderManager().initLoader(EXISTING_PET_LOADER, null, this);
+
+
         }
+
+        imageViewFruit = (ImageView) findViewById(R.id.image_view_fruit);
 
         // Find all relevant views that we will need to read user input from
         mNameEditText = (EditText) findViewById(R.id.edit_product_name);
@@ -97,7 +115,54 @@ public class EditorActivity extends AppCompatActivity implements
 
     }
 
-    
+        public void btnTakePhotoClicked(View view){
+            askPermission(Manifest.permission.CAMERA, PHOTO_REQUEST_CODE);
+            Intent cameraIntent = new Intent (MediaStore.ACTION_IMAGE_CAPTURE);
+//            File pictureDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+//            String pictureName = getPictureName();
+//            File imageFile = new File (pictureDirectory, pictureName);
+//            Uri pictureUri = Uri.fromFile(imageFile);
+//            cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, pictureUri );
+            startActivityForResult(cameraIntent, CAMERA_REQUEST);
+
+    }
+
+    private String getPictureName() {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
+        String timeStamp = sdf.format(new Date());
+        return "Fruit Image" + timeStamp + "jpg";
+    }
+
+    private void askPermission(String permission, int requestCode) {
+        //Check for permission. If we don't have permission we request it
+        if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED){
+            ActivityCompat.requestPermissions(this, new String[] {permission}, requestCode);
+
+
+        } else {
+            Toast.makeText(this,"Permission already granted", Toast.LENGTH_SHORT ).show();
+            //This code
+        }
+
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+// Did the user choose OK , if so the next if statement executes
+        if (resultCode == RESULT_OK) {
+            if (requestCode == CAMERA_REQUEST) {
+                //Testing for return from camera
+                Bitmap cameraImage = (Bitmap) data.getExtras().get("data");
+                //at this point we have the image from the camera
+
+               imageViewFruit.setImageBitmap(cameraImage);
+
+            }
+        }
+    }
+
     /**
      * Get user input from editor and save pet into database.
      */
@@ -300,12 +365,12 @@ public class EditorActivity extends AppCompatActivity implements
             // Find the columns of pet attributes that we're interested in
             int nameColumnIndex = cursor.getColumnIndex(InventoryContract.InventoryEntry.COLUMN_NAME);
             int quantityColumnIndex = cursor.getColumnIndex(InventoryContract.InventoryEntry.COLUMN_QUANTITY);
-            int pricColumnIndex = cursor.getColumnIndex(InventoryContract.InventoryEntry.COLUMN_PRICE);
+            int priceColumnIndex = cursor.getColumnIndex(InventoryContract.InventoryEntry.COLUMN_PRICE);
 
             // Extract out the value from the Cursor for the given column index
             String name = cursor.getString(nameColumnIndex);
-            int quantity = cursor.getInt(pricColumnIndex);
-            int price = cursor.getInt(pricColumnIndex);
+            int quantity = cursor.getInt(quantityColumnIndex);
+            int price = cursor.getInt(priceColumnIndex);
 
             // Update the views on the screen with the values from the database
             mNameEditText.setText(name);

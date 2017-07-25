@@ -76,5 +76,22 @@
             android:hint="@string/hint_price"
             android:inputType="numberDecimal|number" />
     </LinearLayout>
+
+    <Button
+        android:id="@+id/btnCapture"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Add a photo"
+        android:onClick="btnTakePhotoClicked"/>
+
+    <ImageView
+        android:id="@+id/image_view_fruit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        />
+
+
 </LinearLayout>
 
